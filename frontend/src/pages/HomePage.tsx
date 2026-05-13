@@ -6,6 +6,8 @@ function HomePage() {
   const navigate = useNavigate()
   const [quizArray, setQuizArray] = useState<QuizSession[]>([])
   const [count, setCount] = useState<number>(10)
+  const [quizType, setQuizType] = useState<number>(1)
+
 
   const startQuiz = async () => {
       const res = await fetch('/api/quiz', {
@@ -13,7 +15,7 @@ function HomePage() {
           headers: {
               'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ count: count })
+          body: JSON.stringify({ count: count, type: quizType })
       })
 
       const data : Quiz = await res.json()
@@ -31,12 +33,37 @@ function HomePage() {
   return (
     <div>
       <h1>Quiz App</h1>
-      <input
+
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          startQuiz();
+        }}>
+
+        <input
           value={count}
           onChange={(e) => setCount(Number(e.target.value))}
           placeholder="Количество вопросов в квизе"
         />
-      <button onClick={startQuiz}>Начать квиз</button>
+        <select
+          value={quizType}
+          onChange={(e) => setQuizType(Number(e.target.value))}
+        >
+          <option value={1}>
+            Хирагана
+          </option>
+
+          <option value={2}>
+            Катакана
+          </option>
+
+          <option value={3}>
+            Обе каны
+          </option>
+        </select>
+        <button type="submit" disabled={!count}>Начать квиз</button>
+      </form>
+
       <div>
           {
             quizArray.map(quiz=> (

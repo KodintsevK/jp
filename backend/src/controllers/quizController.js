@@ -2,21 +2,43 @@ const Kana = require("../models/Kana");
 const QuizQuestion = require("../models/QuizQuestion");
 const QuizSession = require("../models/QuizSession");
 const sequelize = require("./../db/sequelize_instance");
-
+const KANA_TYPES = require("./../konstants")
 class quizController {
     constructor() {
-
     }
 
+    
     async createQuiz(req, res){
-        try {
-            console.log(req.body);
-            
+        try {            
             const {
-                count = 10
+                count = 10,
+                type = 1
             } = req.body;
+            
+            if (count <= 0 || count > 50 || !count) {
+                return res.status(400).json({
+                    message: 'Количество вопросов не может быть меньше 0 или больше 50.'
+                })
+            }
+
+            // 1 - h
+            // 2 - k
+            // 3 - 1+2
+            if (![1, 2, 3].includes(type)){
+                return res.status(400).json({
+                    message: 'Тип вопросов может быть следующим: Хирагана, Катакана, Оба.'
+                })
+            }
+            const typeMap = {
+                1: KANA_TYPES.HIRAGANA,
+                2: KANA_TYPES.KATAKANA,
+                3: [ KANA_TYPES.HIRAGANA, KANA_TYPES.KATAKANA ]
+            }
 
             const kanaList = await Kana.findAll({
+                where: {
+                    type: typeMap[type]
+                },
                 order: sequelize.random(),
                 limit: count
             });
